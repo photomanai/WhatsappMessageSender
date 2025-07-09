@@ -1,0 +1,11 @@
+curl -X 'POST' \                                                          ─╯
+  'http://localhost:3000/api/sendText' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "chatId": "99470xxxxxxx@c.us",
+  "text": "*Hello *, \nThank you for , \nDevetly CTO - Adil Abdulkerimov",
+  "session": "default"
+}'
+
+docker run -it -p 3000:3000 devlikeapro/waha
