@@ -9,3 +9,5 @@ curl -X 'POST' \                                                          ─╯
 }'
 
 docker run -it -p 3000:3000 devlikeapro/waha
+docker run -d -p 3000:3000 devlikeapro/waha
+docker run -d --restart always -p 3000:3000 devlikeapro/waha
