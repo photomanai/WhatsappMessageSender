@@ -94,4 +94,4 @@ MIT License
 
 ## ✍️ Author
 
-Created by \[Your Name]. Contributions and suggestions welcome!
+Created by \Photomanai. Contributions and suggestions welcome!
