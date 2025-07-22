@@ -63,19 +63,20 @@ app.post("/api/send-message", async (req, res) => {
 app.post("/webhook", (req, res) => {
   const message = req.body;
 
-  const from = message.from;
-  const msgText = message.message?.text?.body || "";
+  console.log(message);
+  // const from = message.from;
+  // const msgText = message.message?.text?.body || "";
 
-  console.log(`[${from}] => ${msgText}`);
+  // console.log(`[${from}] => ${msgText}`);
 
-  // Basit cevap mantığı
-  if (msgText.toLowerCase() === "hello") {
-    sendText(from, "Hi there! How can I help you?");
-  } else if (msgText.toLowerCase() === "1") {
-    sendText(from, "You chose option 1 ✅");
-  } else {
-    sendText(from, "Sorry, I didn’t understand that.");
-  }
+  // // Basit cevap mantığı
+  // if (msgText.toLowerCase() === "hello") {
+  //   sendText(from, "Hi there! How can I help you?");
+  // } else if (msgText.toLowerCase() === "1") {
+  //   sendText(from, "You chose option 1 ✅");
+  // } else {
+  //   sendText(from, "Sorry, I didn’t understand that.");
+  // }
 
   res.sendStatus(200);
 });
