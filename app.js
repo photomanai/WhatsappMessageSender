@@ -15,7 +15,7 @@ const pool = mysql.createPool({
   multipleStatements: true,
 });
 
-pool.promise();
+const db = pool.promise();
 
 const app = express();
 const port = process.env.PORT || "8888";
@@ -74,21 +74,42 @@ app.post("/api/send-message", async (req, res) => {
   res.json({ results });
 });
 
-app.post("/webhook", (req, res) => {
+const getContactsNumList = async () => {
+  try {
+    const [rows] = await db.query("SELECT * FROM contacts");
+    return rows;
+  } catch (error) {
+    console.error("MySQL Error:", error.message);
+    res.status(500).json({ success: false, error: "Database error" });
+  }
+};
+
+app.post("/webhook", async (req, res) => {
   const message = req.body;
-  const { payload } = message;
+
+  const payload = message?.payload;
+  if (!payload || typeof payload !== "object") {
+    console.log("Warning: Invalid payload structure.");
+    return res.sendStatus(200);
+  }
+
   const { from, body, _data } = payload;
-  const { Sender } = _data.Info;
 
-  const senderMatch = Sender.match(/^(\d+)@(\w)/);
-  const senderNum = senderMatch[1];
+  const senderRaw = _data?.Info?.Sender;
+  const senderMatch =
+    typeof senderRaw === "string" ? senderRaw.match(/^(\d+)@(\w)/) : null;
+  const senderNum = senderMatch ? senderMatch[1] : "Unknown";
 
-  const match = from.match(/^(\d+)@(\w)/);
-  const isPersonalChat = match[2] == "c";
+  const fromMatch = typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
+  const isPersonalChat = fromMatch && fromMatch[2] === "c";
 
   if (isPersonalChat) {
     console.log(`${senderNum}: ${body}`);
+    console.log(await getContactsNumList());
+  } else {
+    console.log("Not a personal chat or invalid format.");
   }
+
   res.sendStatus(200);
 });
 
