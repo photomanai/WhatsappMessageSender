@@ -1,7 +1,21 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const mysql = require("mysql2");
 require("dotenv").config();
+
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  multipleStatements: true,
+});
+
+pool.promise();
 
 const app = express();
 const port = process.env.PORT || "8888";
@@ -62,22 +76,19 @@ app.post("/api/send-message", async (req, res) => {
 
 app.post("/webhook", (req, res) => {
   const message = req.body;
+  const { payload } = message;
+  const { from, body, _data } = payload;
+  const { Sender } = _data.Info;
 
-  console.log(message);
-  // const from = message.from;
-  // const msgText = message.message?.text?.body || "";
+  const senderMatch = Sender.match(/^(\d+)@(\w)/);
+  const senderNum = senderMatch[1];
 
-  // console.log(`[${from}] => ${msgText}`);
+  const match = from.match(/^(\d+)@(\w)/);
+  const isPersonalChat = match[2] == "c";
 
-  // // Basit cevap mantığı
-  // if (msgText.toLowerCase() === "hello") {
-  //   sendText(from, "Hi there! How can I help you?");
-  // } else if (msgText.toLowerCase() === "1") {
-  //   sendText(from, "You chose option 1 ✅");
-  // } else {
-  //   sendText(from, "Sorry, I didn’t understand that.");
-  // }
-
+  if (isPersonalChat) {
+    console.log(`${senderNum}: ${body}`);
+  }
   res.sendStatus(200);
 });
 
