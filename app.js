@@ -29,7 +29,16 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/send-message", async (req, res) => {
-  const { message, recipients } = req.body;
+  const {
+    message,
+    recipients,
+    eventId,
+    eventName,
+    organizerName,
+    eventType,
+    eventTime,
+    eventLocation,
+  } = req.body;
 
   if (!message || !Array.isArray(recipients)) {
     return res.status(400).json({ error: "Invalid input format" });
@@ -39,7 +48,19 @@ app.post("/api/send-message", async (req, res) => {
 
   for (const recipient of recipients) {
     const chatId = `${recipient.send}@c.us`;
-    const text = `*Salam ${recipient.display_name}*,\n${message}\n\nDevetly Team`;
+    const text = `*Salam ${recipient.display_name}*,\n${message}
+
+*Tədbirin Detalları*
+Tədbirin adı: ${eventName}
+Tədbiri keçirən: ${organizerName}
+Məkan: ${eventLocation}
+Vaxt: ${eventTime}
+Type: ${eventType}
+Id: ${eventId}
+
+Tədbirə qoşulacaqsınızsa sadəcə *hə* və ya *yox* yazaraq cavab verin.
+
+Devetly Team`;
 
     try {
       const response = await axios.post(
@@ -47,7 +68,7 @@ app.post("/api/send-message", async (req, res) => {
         {
           chatId,
           text,
-          session: "default",
+          session: "test",
         },
         {
           headers: {
@@ -163,7 +184,6 @@ app.post("/webhook", async (req, res) => {
         "yep",
         "yup",
         "yeah",
-        "y",
         "sure",
         "ok",
         "okay",
@@ -178,10 +198,6 @@ app.post("/webhook", async (req, res) => {
         "01",
         "true",
         "okeyy",
-        "ye",
-        "ya",
-        "yaa",
-        "kk",
 
         "👍",
         "✅",
