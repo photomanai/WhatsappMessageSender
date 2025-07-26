@@ -80,39 +80,156 @@ const getContactsNumList = async () => {
     return rows;
   } catch (error) {
     console.error("MySQL Error:", error.message);
-    res.status(500).json({ success: false, error: "Database error" });
+    return [];
   }
 };
 
 app.post("/webhook", async (req, res) => {
-  const message = req.body;
+  try {
+    const message = req.body;
 
-  const payload = message?.payload;
-  if (!payload || typeof payload !== "object") {
-    console.log("Warning: Invalid payload structure.");
-    return res.sendStatus(200);
+    const payload = message?.payload;
+    if (!payload || typeof payload !== "object") {
+      console.warn("Invalid payload structure.");
+      return res.sendStatus(200);
+    }
+
+    const { from, body, _data, replyTo } = payload;
+    const senderRaw = _data?.Info?.Sender;
+
+    let senderNum = null;
+
+    if (typeof senderRaw === "string") {
+      const atIndex = senderRaw.indexOf("@");
+      if (atIndex !== -1) {
+        const beforeAt = senderRaw.slice(0, atIndex);
+        const match = beforeAt.match(/^(\d+)/);
+        senderNum = match ? match[1] : null;
+      }
+    }
+
+    const fromMatch =
+      typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
+    const isPersonalChat = fromMatch && fromMatch[2] === "c";
+
+    if (isPersonalChat && replyTo && typeof replyTo.body === "string") {
+      console.log(`Message Arrived: ${senderNum}: ${body}`);
+
+      const typeMatch = replyTo.body.match(/Type:\s*(.+)/);
+      const idMatch = replyTo.body.match(/Id:\s*(\d+)/);
+
+      const result = {
+        type: typeMatch ? typeMatch[1].trim() : null,
+        id: idMatch ? parseInt(idMatch[1], 10) : null,
+      };
+
+      if (!result.type || !result.id) {
+        console.warn("Type or ID not found");
+        return res.sendStatus(200);
+      }
+
+      const userReply = body.toLowerCase().trim();
+      const positiveReplies = [
+        "evet",
+        "evt",
+        "ewe",
+        "ewet",
+        "he",
+        "tamam",
+        "geliyorum",
+        "gelcem",
+        "gelirem",
+        "tammdr",
+        "gelir",
+        "tamamdır",
+        "gelecem",
+
+        "he",
+        "hə",
+        "gelirem",
+        "gelecem",
+        "bəli",
+        "gelirəm",
+        "həə",
+        "elədi",
+        "həəə",
+        "tamamdi",
+        "tamamdır",
+        "okdi",
+        "oldu",
+        "gələcəm",
+
+        "yes",
+        "yep",
+        "yup",
+        "yeah",
+        "y",
+        "sure",
+        "ok",
+        "okay",
+        "okey",
+        "fine",
+        "coming",
+        "i will come",
+        "i come",
+        "i’ll come",
+
+        "1",
+        "01",
+        "true",
+        "okeyy",
+        "ye",
+        "ya",
+        "yaa",
+        "kk",
+
+        "👍",
+        "✅",
+        "🆗",
+        "👌",
+      ];
+
+      const isPositive = positiveReplies.some((pos) => userReply.includes(pos));
+
+      const comeValue = isPositive ? 1 : 0;
+
+      const contacts = await getContactsNumList();
+
+      const normalizeNumber = (num) =>
+        typeof num === "string" ? num.replace(/\D/g, "") : "";
+
+      const matchedContact = contacts.find(
+        (contact) =>
+          contact.group_id == result.id &&
+          contact.type == result.type &&
+          normalizeNumber(contact.phone_num) === normalizeNumber(senderNum)
+      );
+
+      if (matchedContact) {
+        const contactId = matchedContact.id;
+
+        await db.query(`UPDATE contacts SET come = ? WHERE id = ?`, [
+          comeValue,
+          contactId,
+        ]);
+
+        console.log(
+          `The 'come' status was updated to ${comeValue} for contact ID ${contactId}.`
+        );
+      } else {
+        console.log("No matching contact found in the database.");
+      }
+    } else {
+      console.log(
+        "This is not a personal conversation or a reply to a message."
+      );
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Webhook Processing Error:", error);
+    res.sendStatus(500);
   }
-
-  const { from, body, _data, replyTo } = payload;
-
-  const senderRaw = _data?.Info?.Sender;
-  const senderMatch =
-    typeof senderRaw === "string" ? senderRaw.match(/^(\d+)@(\w)/) : null;
-  const senderNum = senderMatch ? senderMatch[1] : "Unknown";
-
-  const fromMatch = typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
-  const isPersonalChat = fromMatch && fromMatch[2] === "c";
-
-  if (isPersonalChat) {
-    console.log(`${senderNum}: ${body}`);
-    // console.log(await getContactsNumList());
-    console.log(!replyTo ? "No Reply" : replyTo);
-    // console.log(payload);
-  } else {
-    console.log("Not a personal chat or invalid format.");
-  }
-
-  res.sendStatus(200);
 });
 
 app.listen(port, ip, () => {
