@@ -93,7 +93,7 @@ app.post("/webhook", async (req, res) => {
     return res.sendStatus(200);
   }
 
-  const { from, body, _data } = payload;
+  const { from, body, _data, replyTo } = payload;
 
   const senderRaw = _data?.Info?.Sender;
   const senderMatch =
@@ -105,7 +105,9 @@ app.post("/webhook", async (req, res) => {
 
   if (isPersonalChat) {
     console.log(`${senderNum}: ${body}`);
-    console.log(await getContactsNumList());
+    // console.log(await getContactsNumList());
+    console.log(!replyTo ? "No Reply" : replyTo);
+    // console.log(payload);
   } else {
     console.log("Not a personal chat or invalid format.");
   }
