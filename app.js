@@ -58,7 +58,7 @@ Vaxt: ${eventTime}
 Type: ${eventType}
 Id: ${eventId}
 
-Tədbirə qoşulacaqsınızsa sadəcə *hə* və ya *yox* yazaraq cavab verin.
+Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
 
 Devetly Team`;
 
@@ -68,7 +68,7 @@ Devetly Team`;
         {
           chatId,
           text,
-          session: "test",
+          session: "devetly",
         },
         {
           headers: {
