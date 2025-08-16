@@ -50,17 +50,17 @@ app.post("/api/send-message", async (req, res) => {
     const chatId = `${recipient.send}@c.us`;
     const text = `*Salam ${recipient.display_name}*,\n${message}
 
-*Tədbirin Detalları*
-Tədbirin adı: ${eventName}
-Tədbiri keçirən: ${organizerName}
-Məkan: ${eventLocation}
-Vaxt: ${eventTime}
+*Tədbirin Detalları:*
+*Tədbirin adı*: ~${eventName}~
+*Tədbiri keçirən*: ~${organizerName}~
+*Məkan*: ~${eventLocation}~
+*Vaxt*: ~${eventTime}~
 Type: ${eventType}
 Id: ${eventId}
 
 Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
 
-Devetly Team`;
+©Devetly`;
 
     try {
       const response = await axios.post(
