@@ -116,20 +116,21 @@ app.post("/webhook", async (req, res) => {
     }
 
     const { from, body, _data, replyTo } = payload;
-    console.log("-----------------------------------------------");
-    console.log(from);
-    console.log("-----------------------------------------------");
-    console.log(body);
-    console.log("-----------------------------------------------");
-    console.log(replyTo);
-    console.log("-----------------------------------------------");
-    console.log(_data);
-    console.log("-----------------------------------------------");
+    // console.log("-----------------------------------------------");
+    // console.log(from);
+    // console.log("-----------------------------------------------");
+    // console.log(body);
+    // console.log("-----------------------------------------------");
+    // console.log(replyTo);
+    // console.log("-----------------------------------------------");
+    // console.log(_data);
+    // console.log("-----------------------------------------------");
+
     // const senderRaw = _data?.Info?.Sender;
     const senderRaw = _data?.id?.remote;
-    console.log("-----------------------------------------------");
-    console.log(senderRaw);
-    console.log("-----------------------------------------------");
+    // console.log("-----------------------------------------------");
+    // console.log(senderRaw);
+    // console.log("-----------------------------------------------");
 
     let senderNum = null;
     if (typeof senderRaw === "string") {
@@ -140,9 +141,9 @@ app.post("/webhook", async (req, res) => {
         senderNum = match ? match[1] : null;
       }
     }
-    console.log("-----------------------------------------------");
-    console.log(senderNum);
-    console.log("-----------------------------------------------");
+    // console.log("-----------------------------------------------");
+    // console.log(senderNum);
+    // console.log("-----------------------------------------------");
     const fromMatch =
       typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
     const isPersonalChat = fromMatch && fromMatch[2] === "c";
