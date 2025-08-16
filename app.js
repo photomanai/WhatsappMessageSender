@@ -126,8 +126,8 @@ app.post("/webhook", async (req, res) => {
     // console.log(_data);
     // console.log("-----------------------------------------------");
 
-    // const senderRaw = _data?.Info?.Sender;
-    const senderRaw = _data?.id?.remote;
+    const senderRaw = _data?.Info?.Sender;
+    // const senderRaw = _data?.id?.remote;
     // console.log("-----------------------------------------------");
     // console.log(senderRaw);
     // console.log("-----------------------------------------------");
