@@ -115,9 +115,11 @@ app.post("/webhook", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    console.log(payload);
-
     const { from, body, _data, replyTo } = payload;
+    console.log(from);
+    console.log(body);
+    console.log(_data);
+    console.log(replyTo);
     const senderRaw = _data?.Info?.Sender;
 
     let senderNum = null;
