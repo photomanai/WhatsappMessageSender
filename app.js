@@ -116,10 +116,15 @@ app.post("/webhook", async (req, res) => {
     }
 
     const { from, body, _data, replyTo } = payload;
+    console.log("-----------------------------------------------");
     console.log(from);
+    console.log("-----------------------------------------------");
     console.log(body);
-    console.log(_data);
+    console.log("-----------------------------------------------");
     console.log(replyTo);
+    console.log("-----------------------------------------------");
+    console.log(_data);
+    console.log("-----------------------------------------------");
     const senderRaw = _data?.Info?.Sender;
 
     let senderNum = null;
