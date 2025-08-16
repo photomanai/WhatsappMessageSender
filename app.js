@@ -51,10 +51,10 @@ app.post("/api/send-message", async (req, res) => {
     const text = `*Salam ${recipient.display_name}*,\n${message}
 
 *Tədbirin Detalları:*
-*Tədbirin adı*: ~${eventName}~
-*Tədbiri keçirən*: ~${organizerName}~
-*Məkan*: ~${eventLocation}~
-*Vaxt*: ~${eventTime}~
+*Tədbirin adı*: _${eventName}_
+*Tədbiri keçirən*: _${organizerName}_
+*Məkan*: _${eventLocation}_
+*Vaxt*: _${eventTime}_
 Type: ${eventType}
 Id: ${eventId}
 
