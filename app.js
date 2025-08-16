@@ -126,6 +126,9 @@ app.post("/webhook", async (req, res) => {
     console.log(_data);
     console.log("-----------------------------------------------");
     const senderRaw = _data?.Info?.Sender;
+    console.log("-----------------------------------------------");
+    console.log(senderRaw);
+    console.log("-----------------------------------------------");
 
     let senderNum = null;
     if (typeof senderRaw === "string") {
@@ -136,7 +139,9 @@ app.post("/webhook", async (req, res) => {
         senderNum = match ? match[1] : null;
       }
     }
-
+    console.log("-----------------------------------------------");
+    console.log(senderNum);
+    console.log("-----------------------------------------------");
     const fromMatch =
       typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
     const isPersonalChat = fromMatch && fromMatch[2] === "c";
