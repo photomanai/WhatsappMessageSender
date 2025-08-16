@@ -119,7 +119,7 @@ app.post("/webhook", async (req, res) => {
     const senderRaw = _data?.Info?.Sender;
 
     let senderNum = null;
-
+    console.log(senderRaw);
     if (typeof senderRaw === "string") {
       const atIndex = senderRaw.indexOf("@");
       if (atIndex !== -1) {
