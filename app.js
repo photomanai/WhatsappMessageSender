@@ -40,61 +40,72 @@ app.post("/api/send-message", async (req, res) => {
     eventLocation,
   } = req.body;
 
-  if (!message || !Array.isArray(recipients)) {
-    return res.status(400).json({ error: "Invalid input format" });
+  if (!message || !Array.isArray(recipients) || recipients.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Invalid input format or empty recipients" });
   }
 
-  const results = [];
+  const results = await Promise.all(
+    recipients.map(async (recipient) => {
+      // Eksik alan kontrolü
+      if (!recipient.send || !recipient.display_name) {
+        return {
+          recipient: recipient.send || "unknown",
+          status: "error",
+          error: "Recipient data missing",
+        };
+      }
 
-  for (const recipient of recipients) {
-    const chatId = `${recipient.send}@c.us`;
-    const text = `*Salam ${recipient.display_name}*,\n${message}
+      const chatId = `${recipient.send}@c.us`;
+      const text = `*Salam ${recipient.display_name || "Qonaq"}*,\n${message}
 
 *Tədbirin Detalları:*
-*Tədbirin adı*: _${eventName}_
-*Tədbiri keçirən*: _${organizerName}_
-*Məkan*: _${eventLocation}_
-*Vaxt*: _${eventTime}_ ${
-      recipient.comeWith != null
-        ? `\n*Gələcəksiz*: _${recipient.comeWith}_`
-        : ""
-    }
-Type: ${eventType}
-Id: ${eventId}
+*Tədbirin adı*: _${eventName || ""}_
+*Tədbiri keçirən*: _${organizerName || ""}_
+*Məkan*: _${eventLocation || ""}_
+*Vaxt*: _${eventTime || ""}_${
+        recipient.comeWith != null
+          ? `\n*Gələcəksiz*: _${recipient.comeWith}_`
+          : ""
+      }
+Type: ${eventType || ""}
+Id: ${eventId || ""}
 
 Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
 
 ©Devetly`;
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/sendText",
-        {
-          chatId,
-          text,
-          session: "devetly",
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            accept: "application/json",
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/api/sendText",
+          {
+            chatId,
+            text,
+            session: "devetly",
           },
-        }
-      );
+          {
+            headers: {
+              "Content-Type": "application/json",
+              accept: "application/json",
+            },
+          }
+        );
 
-      results.push({
-        recipient: recipient.send,
-        status: "success",
-        response: response.data,
-      });
-    } catch (error) {
-      results.push({
-        recipient: recipient.send,
-        status: "error",
-        error: error.response ? error.response.data : error.message,
-      });
-    }
-  }
+        return {
+          recipient: recipient.send,
+          status: "success",
+          response: response.data,
+        };
+      } catch (error) {
+        return {
+          recipient: recipient.send,
+          status: "error",
+          error: error.response ? error.response.data : error.message,
+        };
+      }
+    })
+  );
 
   res.json({ results });
 });
