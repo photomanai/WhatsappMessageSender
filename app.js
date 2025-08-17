@@ -38,6 +38,7 @@ app.post("/api/send-message", async (req, res) => {
     eventType,
     eventTime,
     eventLocation,
+    comeWith,
   } = req.body;
 
   if (!message || !Array.isArray(recipients)) {
@@ -54,7 +55,9 @@ app.post("/api/send-message", async (req, res) => {
 *Tədbirin adı*: _${eventName}_
 *Tədbiri keçirən*: _${organizerName}_
 *Məkan*: _${eventLocation}_
-*Vaxt*: _${eventTime}_
+*Vaxt*: _${eventTime}_ ${
+      comeWith != null ? `\n*Gələcəksiz*: _${comeWith}_` : ""
+    }
 Type: ${eventType}
 Id: ${eventId}
 
