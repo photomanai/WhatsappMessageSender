@@ -78,7 +78,7 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
 
       try {
         const response = await axios.post(
-          "http://localhost:3000/api/sendText",
+          "https://wpdevetlysender.synofilms.org/api/sendText",
           {
             chatId,
             text,
