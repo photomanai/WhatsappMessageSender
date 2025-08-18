@@ -21,6 +21,8 @@ const app = express();
 const port = process.env.PORT || "8888";
 const ip = process.env.IP || "127.0.0.1";
 
+const Url = `https://${process.env.BASE_URL}` || "http://127.0.0.1:3000";
+
 app.use(cors());
 app.use(express.json());
 
@@ -78,7 +80,7 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
 
       try {
         const response = await axios.post(
-          `https://${process.env.BASEURL}/api/sendText`,
+          `${Url}/api/sendText`,
           {
             chatId,
             text,
@@ -86,8 +88,9 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
           },
           {
             headers: {
+              Accept: "application/json",
               "Content-Type": "application/json",
-              accept: "application/json",
+              "X-Api-Key": `${process.env.API_KEY}`,
             },
           }
         );
