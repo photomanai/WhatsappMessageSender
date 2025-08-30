@@ -3,6 +3,7 @@ const cors = require("cors");
 const axios = require("axios");
 const mysql = require("mysql2");
 require("dotenv").config();
+const OpenAI = require("openai");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -15,6 +16,10 @@ const pool = mysql.createPool({
   multipleStatements: true,
 });
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 const db = pool.promise();
 
 const app = express();
@@ -22,12 +27,43 @@ const port = process.env.PORT || "8888";
 const ip = process.env.IP || "127.0.0.1";
 
 const Url = `https://${process.env.BASE_URL}` || "http://127.0.0.1:3000";
+const Back_Url = `https://${process.env.BACK_URL}` || "http://127.0.0.1:5000";
 
 app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
   res.end("Hello World");
+});
+
+app.post("/api/send-message-withai", async (req, res) => {
+  try {
+    const names = ["Ahmet", "Ayşe", "Mehmet"];
+    const originalSentence =
+      "Selam sizi duyunume davet ediyorum. Sizi bekleriz.";
+
+    const prompt = `
+Aşağıdaki cümleyi anlamını bozmadan tekrar ifade et. 
+Her bir isim için cümledeki kişiyi değiştir ve bir liste oluştur.
+Sadece listeyi JSON formatında döndür, başka açıklama yazma.
+Cümle: "${originalSentence}"
+İsimler: ${JSON.stringify(names)}
+`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    // Modelin JSON formatında bir liste döndürdüğünü varsayıyoruz
+    const list = JSON.parse(response.choices[0].message.content.trim());
+
+    res.status(200).json({ list });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/api/send-message", async (req, res) => {
@@ -69,6 +105,10 @@ app.post("/api/send-message", async (req, res) => {
 *Vaxt*: _${eventTime || ""}_${
         recipient.comeWith != null
           ? `\n*Gələcəksiz*: _${recipient.comeWith}_`
+          : ""
+      }${
+        recipient.qrHash != null
+          ? `\n*Biletiniz*: _${Back_Url}/info/${recipient.qrHash}_`
           : ""
       }
 Type: ${eventType || ""}
@@ -134,21 +174,8 @@ app.post("/webhook", async (req, res) => {
     }
 
     const { from, body, _data, replyTo } = payload;
-    // console.log("-----------------------------------------------");
-    // console.log(from);
-    // console.log("-----------------------------------------------");
-    // console.log(body);
-    // console.log("-----------------------------------------------");
-    // console.log(replyTo);
-    // console.log("-----------------------------------------------");
-    // console.log(_data);
-    // console.log("-----------------------------------------------");
 
     const senderRaw = _data?.Info?.Sender;
-    // const senderRaw = _data?.id?.remote;
-    // console.log("-----------------------------------------------");
-    // console.log(senderRaw);
-    // console.log("-----------------------------------------------");
 
     let senderNum = null;
     if (typeof senderRaw === "string") {
@@ -159,9 +186,6 @@ app.post("/webhook", async (req, res) => {
         senderNum = match ? match[1] : null;
       }
     }
-    // console.log("-----------------------------------------------");
-    // console.log(senderNum);
-    // console.log("-----------------------------------------------");
     const fromMatch =
       typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
     const isPersonalChat = fromMatch && fromMatch[2] === "c";
