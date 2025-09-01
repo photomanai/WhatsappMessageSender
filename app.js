@@ -141,6 +141,7 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
           response: response.data,
         };
       } catch (error) {
+        console.log(error);
         return {
           recipient: recipient.send,
           status: "error",
