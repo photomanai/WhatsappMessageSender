@@ -66,9 +66,7 @@ app.post("/api/send-message", async (req, res) => {
       }
 
       // Telefon numarasından boşlukları ve özel karakterleri temizle
-      const cleanPhoneNumber = recipient.send
-        .toString()
-        .replace(/[\s\-\+\(\)]/g, "");
+      const cleanPhoneNumber = recipient.send.toString().replace(/\D/g, "");
       const chatId = `${cleanPhoneNumber}@c.us`;
 
       const text = `*Salam ${recipient.display_name || "Qonaq"}*,\n${message}
