@@ -1,71 +1,3 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-const mysql = require("mysql2");
-require("dotenv").config();
-const OpenAI = require("openai");
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  multipleStatements: true,
-});
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const db = pool.promise();
-
-const app = express();
-const port = process.env.PORT || "8888";
-const ip = process.env.IP || "127.0.0.1";
-
-const Url = `https://${process.env.BASE_URL}` || "http://127.0.0.1:3000";
-const Back_Url = `https://${process.env.BACK_URL}` || "http://127.0.0.1:5000";
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.end("Hello World");
-});
-
-app.post("/api/send-message-withai", async (req, res) => {
-  try {
-    const names = ["Ahmet", "Ayşe", "Mehmet"];
-    const originalSentence =
-      "Selam sizi duyunume davet ediyorum. Sizi bekleriz.";
-
-    const prompt = `
-Aşağıdaki cümleyi anlamını bozmadan tekrar ifade et. 
-Her bir isim için cümledeki kişiyi değiştir ve bir liste oluştur.
-Sadece listeyi JSON formatında döndür, başka açıklama yazma.
-Cümle: "${originalSentence}"
-İsimler: ${JSON.stringify(names)}
-`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    });
-
-    // Modelin JSON formatında bir liste döndürdüğünü varsayıyoruz
-    const list = JSON.parse(response.choices[0].message.content.trim());
-
-    res.status(200).json({ list });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.post("/api/send-message", async (req, res) => {
   const {
     message,
@@ -95,7 +27,12 @@ app.post("/api/send-message", async (req, res) => {
         };
       }
 
-      const chatId = `${recipient.send}@c.us`;
+      // Telefon numarasından boşlukları ve özel karakterleri temizle
+      const cleanPhoneNumber = recipient.send
+        .toString()
+        .replace(/[\s\-\+\(\)]/g, "");
+      const chatId = `${cleanPhoneNumber}@c.us`;
+
       const text = `*Salam ${recipient.display_name || "Qonaq"}*,\n${message}
 
 *Tədbirin Detalları:*
@@ -119,6 +56,8 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
 ©Devetly`;
 
       try {
+        console.log(`Sending message to: ${chatId}`);
+
         const response = await axios.post(
           `${Url}/api/sendText`,
           {
@@ -132,6 +71,7 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
               "Content-Type": "application/json",
               "X-Api-Key": `${process.env.API_KEY}`,
             },
+            timeout: 5000,
           }
         );
 
@@ -141,7 +81,10 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
           response: response.data,
         };
       } catch (error) {
-        console.log(error);
+        console.error(
+          `Error sending to ${chatId}:`,
+          error.response?.data || error.message
+        );
         return {
           recipient: recipient.send,
           status: "error",
@@ -152,160 +95,4 @@ Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* v�
   );
 
   res.json({ results });
-});
-
-const getContactsNumList = async () => {
-  try {
-    const [rows] = await db.query("SELECT * FROM contacts");
-    return rows;
-  } catch (error) {
-    console.error("MySQL Error:", error.message);
-    return [];
-  }
-};
-
-app.post("/webhook", async (req, res) => {
-  try {
-    const message = req.body;
-
-    const payload = message?.payload;
-    if (!payload || typeof payload !== "object") {
-      console.warn("Invalid payload structure.");
-      return res.sendStatus(200);
-    }
-
-    const { from, body, _data, replyTo } = payload;
-
-    const senderRaw = _data?.Info?.Sender;
-
-    let senderNum = null;
-    if (typeof senderRaw === "string") {
-      const atIndex = senderRaw.indexOf("@");
-      if (atIndex !== -1) {
-        const beforeAt = senderRaw.slice(0, atIndex);
-        const match = beforeAt.match(/^(\d+)/);
-        senderNum = match ? match[1] : null;
-      }
-    }
-    const fromMatch =
-      typeof from === "string" ? from.match(/^(\d+)@(\w)/) : null;
-    const isPersonalChat = fromMatch && fromMatch[2] === "c";
-
-    if (isPersonalChat && replyTo && typeof replyTo.body === "string") {
-      console.log(`Message Arrived: ${senderNum}: ${body}`);
-
-      const typeMatch = replyTo.body.match(/Type:\s*(.+)/);
-      const idMatch = replyTo.body.match(/Id:\s*(\d+)/);
-
-      const result = {
-        type: typeMatch ? typeMatch[1].trim() : null,
-        id: idMatch ? parseInt(idMatch[1], 10) : null,
-      };
-
-      if (!result.type || !result.id) {
-        console.warn("Type or ID not found");
-        return res.sendStatus(200);
-      }
-
-      const userReply = body.toLowerCase().trim();
-      const positiveReplies = [
-        "evet",
-        "evt",
-        "ewe",
-        "ewet",
-        "he",
-        "tamam",
-        "geliyorum",
-        "gelcem",
-        "gelirem",
-        "tammdr",
-        "gelir",
-        "tamamdır",
-        "gelecem",
-
-        "he",
-        "hə",
-        "gelirem",
-        "gelecem",
-        "bəli",
-        "gelirəm",
-        "həə",
-        "elədi",
-        "həəə",
-        "tamamdi",
-        "tamamdır",
-        "okdi",
-        "oldu",
-        "gələcəm",
-
-        "yes",
-        "yep",
-        "yup",
-        "yeah",
-        "sure",
-        "ok",
-        "okay",
-        "okey",
-        "fine",
-        "coming",
-        "i will come",
-        "i come",
-        "i’ll come",
-
-        "1",
-        "01",
-        "true",
-        "okeyy",
-
-        "👍",
-        "✅",
-        "🆗",
-        "👌",
-      ];
-
-      const isPositive = positiveReplies.some((pos) => userReply.includes(pos));
-
-      const comeValue = isPositive ? 1 : 0;
-
-      const contacts = await getContactsNumList();
-
-      const normalizeNumber = (num) =>
-        typeof num === "string" ? num.replace(/\D/g, "") : "";
-
-      const matchedContact = contacts.find(
-        (contact) =>
-          contact.group_id == result.id &&
-          contact.type == result.type &&
-          normalizeNumber(contact.phone_num) === normalizeNumber(senderNum)
-      );
-
-      if (matchedContact) {
-        const contactId = matchedContact.id;
-
-        await db.query(`UPDATE contacts SET come = ? WHERE id = ?`, [
-          comeValue,
-          contactId,
-        ]);
-
-        console.log(
-          `The 'come' status was updated to ${comeValue} for contact ID ${contactId}.`
-        );
-      } else {
-        console.log("No matching contact found in the database.");
-      }
-    } else {
-      console.log(
-        "This is not a personal conversation or a reply to a message."
-      );
-    }
-
-    res.sendStatus(200);
-  } catch (error) {
-    console.error("Webhook Processing Error:", error);
-    res.sendStatus(500);
-  }
-});
-
-app.listen(port, ip, () => {
-  console.log(`Listening on ${ip}:${port}`);
 });
