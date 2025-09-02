@@ -86,7 +86,7 @@ Id: ${eventId || ""}
 Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
 ${
   recipient.qrHash != null
-    ? `\n*Biletiniz*: _${Back_Url}/info${recipient.qrHash}_`
+    ? `\n*Biletiniz*: _${Back_Url}/info/${recipient.qrHash}_`
     : ""
 }
 ©Devetly`;
