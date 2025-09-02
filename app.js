@@ -81,7 +81,7 @@ app.post("/api/send-message", async (req, res) => {
           : ""
       }${
         recipient.qrHash != null
-          ? `\n*Biletiniz*: _${Back_Url}/info/${recipient.qrHash}_`
+          ? `\n*Biletiniz*: _${Back_Url}/public/img/${recipient.qrHash}.png_`
           : ""
       }
 Type: ${eventType || ""}
