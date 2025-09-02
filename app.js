@@ -79,16 +79,16 @@ app.post("/api/send-message", async (req, res) => {
         recipient.comeWith != null
           ? `\n*Gələcəksiz*: _${recipient.comeWith}_`
           : ""
-      }${
-        recipient.qrHash != null
-          ? `\n*Biletiniz*: _${Back_Url}/public/img/${recipient.qrHash}.png_`
-          : ""
       }
 Type: ${eventType || ""}
 Id: ${eventId || ""}
 
 Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
-
+${
+  recipient.qrHash != null
+    ? `\n*Biletiniz*: _${Back_Url}/public/img/${recipient.qrHash}.png_`
+    : ""
+}
 ©Devetly`;
 
       try {
