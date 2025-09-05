@@ -89,6 +89,7 @@ ${
     ? `\n*Biletiniz*: _ ${Back_Url}/info/${recipient.qrHash} _`
     : ""
 }
+
 ©Devetly`;
 
       try {
