@@ -94,7 +94,18 @@ ${
 
       try {
         console.log(`Sending message to: ${chatId}`); // Debug log
-
+        const seenResponse = await axios.post(
+          `${Url}/api/sendSeen`,
+          {
+            chatId,
+            session: "devetly",
+          },
+          {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "X-Api-Key": `${process.env.API_KEY}`,
+          }
+        );
         const response = await axios.post(
           `${Url}/api/sendText`,
           {
