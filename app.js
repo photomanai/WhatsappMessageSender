@@ -94,7 +94,7 @@ ${
 
       try {
         console.log(`Sending message to: ${chatId}`); // Debug log
-        const seenResponse = await axios.post(
+        /*const seenResponse = await axios.post(
           `${Url}/api/sendSeen`,
           {
             chatId,
@@ -105,7 +105,7 @@ ${
             "Content-Type": "application/json",
             "X-Api-Key": `${process.env.API_KEY}`,
           }
-        );
+        );*/
         const response = await axios.post(
           `${Url}/api/sendText`,
           {
