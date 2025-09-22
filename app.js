@@ -119,7 +119,7 @@ ${
               "Content-Type": "application/json",
               "X-Api-Key": `${process.env.API_KEY}`,
             },
-            timeout: 1000,
+            timeout: 10000,
           }
         );
 
