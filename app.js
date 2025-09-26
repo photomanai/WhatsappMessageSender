@@ -37,18 +37,9 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/send-message", async (req, res) => {
-  const {
-    message,
-    recipients,
-    eventId,
-    eventName,
-    organizerName,
-    eventType,
-    eventTime,
-    eventLocation,
-  } = req.body;
+  const { recipients } = req.body;
 
-  if (!message || !Array.isArray(recipients) || recipients.length === 0) {
+  if (!Array.isArray(recipients) || recipients.length === 0) {
     return res
       .status(400)
       .json({ error: "Invalid input format or empty recipients" });
@@ -57,7 +48,7 @@ app.post("/api/send-message", async (req, res) => {
   const results = await Promise.all(
     recipients.map(async (recipient) => {
       // Eksik alan kontrolü
-      if (!recipient.send || !recipient.display_name) {
+      if (!recipient.send || !recipient.message) {
         return {
           recipient: recipient.send || "unknown",
           status: "error",
@@ -69,32 +60,12 @@ app.post("/api/send-message", async (req, res) => {
       const cleanPhoneNumber = recipient.send.toString().replace(/\D/g, "");
       const chatId = `${cleanPhoneNumber}@c.us`;
 
-      const text = `*Salam ${recipient.display_name || "Qonaq"}*,\n${message}
-
-*Tədbirin Detalları:*
-*Tədbirin adı*: _${eventName || ""}_
-*Tədbiri keçirən*: _${organizerName || ""}_
-*Məkan*: _${eventLocation || ""}_
-*Vaxt*: _${eventTime || ""}_${
-        recipient.comeWith != null
-          ? `\n*Gələcəksiz*: _${recipient.comeWith}_`
-          : ""
-      }
-Type: ${eventType || ""}
-Id: ${eventId || ""}
-
-Tədbirə qoşulacaqsınızsa sadəcə mesajı sağa sürüşdürərək *hə* və ya *yox* yazaraq cavab verin.
-${
-  recipient.qrHash != null
-    ? `\n*Biletiniz*: _ ${Back_Url}/info/${recipient.qrHash} _`
-    : ""
-}
-
-©Devetly`;
+      const text = recipient.message;
 
       try {
         console.log(`Sending message to: ${chatId}`); // Debug log
-        /*const seenResponse = await axios.post(
+        /*
+        const seenResponse = await axios.post(
           `${Url}/api/sendSeen`,
           {
             chatId,
@@ -105,7 +76,8 @@ ${
             "Content-Type": "application/json",
             "X-Api-Key": `${process.env.API_KEY}`,
           }
-        );*/
+        );
+        */
         const response = await axios.post(
           `${Url}/api/sendText`,
           {
