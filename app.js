@@ -172,6 +172,7 @@ app.post("/webhook", async (req, res) => {
 
       const userReply = body.toLowerCase().trim();
       const positiveReplies = [
+        // Türkçe
         "evet",
         "evt",
         "ewe",
@@ -186,7 +187,7 @@ app.post("/webhook", async (req, res) => {
         "tamamdır",
         "gelecem",
 
-        "he",
+        // Azerice
         "hə",
         "gelirem",
         "gelecem",
@@ -201,6 +202,7 @@ app.post("/webhook", async (req, res) => {
         "oldu",
         "gələcəm",
 
+        // İngilizce
         "yes",
         "yep",
         "yup",
@@ -215,11 +217,37 @@ app.post("/webhook", async (req, res) => {
         "i come",
         "i’ll come",
 
+        // Rusça
+        "да",
+        "ага",
+        "угу",
+        "конечно",
+        "хорошо",
+        "ладно",
+        "иду",
+        "буду",
+        "приду",
+        "да, приду",
+
+        // Polonyaca (Polsa)
+        "tak",
+        "pewnie",
+        "oczywiście",
+        "dobra",
+        "w porządku",
+        "okej",
+        "idę",
+        "będę",
+        "przyjdę",
+        "tak, przyjdę",
+
+        // Diğer
         "1",
         "01",
         "true",
         "okeyy",
 
+        // Emoji
         "👍",
         "✅",
         "🆗",
