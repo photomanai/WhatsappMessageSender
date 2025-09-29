@@ -163,6 +163,9 @@ app.post("/webhook", async (req, res) => {
         type: typeMatch ? typeMatch[1].trim() : null,
         id: idMatch ? parseInt(idMatch[1], 10) : null,
       };
+      console.log(typeMatch);
+      console.log(idMatch);
+
       console.log(result);
 
       if (!result.type || !result.id) {
