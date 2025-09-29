@@ -159,8 +159,8 @@ app.post("/webhook", async (req, res) => {
 
       console.log(replyTo);
 
-      const typeMatch = replyTo.body.match(/\*Type\*:\s*(.+)/m);
-      const idMatch = replyTo.body.match(/\*Id\*:\s*(\d+)/m);
+      const typeMatch = replyTo.body.match(/\*Type:\*\s*([^\r\n]+)/);
+      const idMatch = replyTo.body.match(/\*Id:\*\s*(\d+)/);
       const result = {
         type: typeMatch ? typeMatch[1].trim() : null,
         id: idMatch ? parseInt(idMatch[1], 10) : null,
