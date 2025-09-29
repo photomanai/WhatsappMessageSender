@@ -157,8 +157,8 @@ app.post("/webhook", async (req, res) => {
     if (isPersonalChat && replyTo && typeof replyTo.body === "string") {
       console.log(`Message Arrived: ${senderNum}: ${body}`);
 
-      const typeMatch = replyTo.body.match(/Type:\s*(.+)/);
-      const idMatch = replyTo.body.match(/Id:\s*(\d+)/);
+      const typeMatch = replyTo.body.match(/\*Type\*:\s*(.+)/);
+      const idMatch = replyTo.body.match(/\*Id\*:\s*(\d+)/);
 
       const result = {
         type: typeMatch ? typeMatch[1].trim() : null,
